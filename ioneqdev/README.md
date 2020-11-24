@@ -75,7 +75,7 @@ egatuzz@mpe.mpg.de
     
 New in version 1.3 (October 2020):
 - Abundances are read from XSPEC 
-- The model relies on the fftw library provided by XSPEC
+- The model relies on the fftw library provided by HEASOFT
 
 New in version 1.2 (January 2019): 
  - Now the energy grid covers until 1e6 eV
