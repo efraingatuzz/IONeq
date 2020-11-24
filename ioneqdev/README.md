@@ -79,8 +79,6 @@ New in version 1.3 (October 2020):
 
 New in version 1.2 (January 2019): 
  - Now the energy grid covers until 1e6 eV
- - Now when doing the interpolation of the photoabsorption-cross sections 
- - We are using Verner cross-sections for high energy
-
+ 
  New in version 1.1 (May 2019): 
-- This version includes H,He,C,N,O,Ne,Mg,Ne,S,Si,Ar,Ca,Fe,Ni and Zn  from opacity project
+- Only cross-sections for ions with relative abundance >1e-3 are interpolated (to increase speed)
