@@ -48,7 +48,7 @@ ATOMIC DATA
 
 With the default set up - that is, if you have run compile.sh - the model will look for the cross-section data file in atomic_data/AtomicData.fits, relative to the directory in which the module is located. The XSPEC xset command can be used to set the IONEQROOT variable; if this is set then it is used instead of the path to the module. So after
 
-XSPEC12> xset IONEQROOT /data/ioneq/
+XSPEC12> xset IONEQROOT /path-to-folder/ioneq/
 
 then the model will use the file atomic_data/AtomicData.fits (the IONEQROOT refers to the directory containing the atomic_data/ directory). Note that IONEQROOT over-rides any changes made by running compile.sh when building the model.
 
