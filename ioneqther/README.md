@@ -1,10 +1,10 @@
-# IONeq
+# IONeqther
 
-IONeq is an X-ray high-resolution photoabsorption model which compute the absorption coefficient assuming ionization equilibrium. The model takes into account turbulent broadening.  A complete description of the science behind the model is described in [Gatuzz & Churazov (2018)](https://ui.adsabs.harvard.edu/abs/2018MNRAS.474..696G/abstract).
+IONeq is an X-ray high-resolution photoabsorption model which compute the absorption coefficient assuming ionization equilibrium. The model takes into account turbulent broadening.  A complete description of the science behind the model is described in [Gatuzz & Churazov (2018)](https://ui.adsabs.harvard.edu/abs/2018MNRAS.474..696G/abstract).Note that the IONeq does not solve the thermal equilibrium equations, that is the balance heating rate=cooling rate, from which one obtains the gas temperature. Instead, the gas temperature T is as independent (free) parameters of the model.
 
-Note that the IONeq does not solve the thermal equilibrium equations, that is the balance heating rate=cooling rate, from which one obtains the gas temperature. Instead, the gas temperature T is as independent (free) parameters of the model.
+IONeqther consider only collisional ionization equilibrium (i.e. without photoionization)
 
-OBTAINING IONeq
+OBTAINING IONeqther
 
 The model can be downloaded from the Github repository at https://github.com/efraingatuzz/IONeq. The contents of the folder include:
 
