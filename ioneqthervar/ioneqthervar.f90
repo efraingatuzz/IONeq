@@ -51,7 +51,7 @@ character (len=40) version
 version='1.2'
 if(startup)then
  print *, ' '
- print *, 'ioneqthervar model Version 1.0' 
+ print *, 'ioneqthervar model Version ',version
  print *, 'Gatuzz & Churazov (2016)'
  print *, 'Abundaces are provided by XSPEC'  
  print *, ' '
@@ -160,12 +160,6 @@ do zn=1,30,1 !Nuclear charge
 
 enddo  
 
- 
-!!! For Oxygen !!!
- !open(unit=20,file='O_CIE.txt',position='append')
- !write(20,*)lt,atom_frac(8,1),atom_frac(8,2),atom_frac(8,3),atom_frac(8,4), &
- !atom_frac(8,5),atom_frac(8,6),atom_frac(8,7),atom_frac(8,8)
- !close(out_unit)  
 
 call absorption_ioneqthervar(nH,Fegr_dust,atom_frac,atomabund,zfac, emod, nemod, optical_depth,bxs_restored,cion,bener,tol) 
 
@@ -544,21 +538,7 @@ end subroutine create_energy_grid_ioneqthervar
       alpha=pgamma-1
       norm=(alpha-1)*e_min**(alpha-1)
       background_ioneqthervar=norm*(e_bkg**(-alpha))
-!!      background_ioneqthervar=4.d0*pi*norm*(e_bkg**(-alpha))
 
-!!! Blackbody with peak at Tbb=1 keV!!!
-!!norm=15/((pi)**4)
-!!background_ioneqthervar=norm*(dble(e_bkg)**3)/(dexp(dble(e_bkg))-1)
-
- 
-!!Background from Churazov
-!---- UV
-!!     bu=2.5
-!!     i0u=4.d0*pi*0.287
-!---- XRB
-!!      xrb=4.d0*pi*1.75d-26*(e_bkg/40d0)**(-1.29)*dexp(-dble(e_bkg)/40d0)/(40d0*1.602177d-9)*2.417d17
-!!      background_ioneqthervar=xrb+i0u*e_bkg**(-bu)
-!      background=0
       return
       end
 
@@ -680,11 +660,6 @@ end subroutine create_energy_grid_ioneqthervar
                p=p+4.d0*pi*s_tmp*1d-18*background_ioneqthervar(e_pceq,e1)*(de/(e_pceq)) 
                wa=wa+4.d0*pi*s_tmp*1d-18*background_ioneqthervar(e_pceq,e1)*(de/(e_pceq)) 
 
-
-!To include ionization parameter 
-!               p=p+xi_factor*s_tmp*1d-18*background_ioneqthervar(e_pceq,e1)*(de/(e_pceq)) 
-!               wa=wa+xi_factor*s_tmp*1d-18*background_ioneqthervar(e_pceq,e1)*(de/(e_pceq)) 
- 
  
                e_pceq = e_pceq+de
             end do 
@@ -716,14 +691,10 @@ end subroutine create_energy_grid_ioneqthervar
  
          end do 
          p=p+p2 !Auger effect
-!         p=(Xi*p) !Ionization parameter 
          p=(Xi*p)/(4*pi) !Ionization parameter 
-!        p=(Xi*p*nee)/(4*pi) !Ionization parameter 
-!         p=(Xi*p*nee)  !Ionization parameter 
-!         p=(Xi*p*nee)/((4*pi)**2.) !Ionization parameter 
-!         p=(Xi*p)/(4*pi)**2. !Ionization parameter 
+
          pp(i)=p
-!        pp(i)=0 !no photoionization
+
  
       end do 
 
