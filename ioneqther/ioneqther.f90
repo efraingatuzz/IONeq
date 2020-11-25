@@ -6,9 +6,6 @@
 ! XSPEC local model for absorption considering ionization equilibrium
 ! Version 1.2 October 2020
 !
-!
-! To do list:
-!
 ! Notes on version 1.2
 ! -- Abundances are read from XSPEC 
 ! -- The model relies on the fftw library provided by XSPEC
@@ -81,6 +78,7 @@ lt = param(2)
 t=10**lt
 ion_par=0.
 !Ionization parameter is in units of keV*cm/s, in order to compare with XSTAR a conversion is required --> ion_par(ioneqther) = 8.79 + ion_par(xstar)
+!For this version photoionization is not included
 Xi = 10**(ion_par) 
 AFe_dust = param(3)  
 vturb=param(4)
@@ -161,13 +159,6 @@ do zn=1,30,1 !Nuclear charge
  endif
 
 enddo  
-
- 
-!!! For Oxygen !!!
- !open(unit=20,file='O_CIE.txt',position='append')
- !write(20,*)lt,atom_frac(8,1),atom_frac(8,2),atom_frac(8,3),atom_frac(8,4), &
- !atom_frac(8,5),atom_frac(8,6),atom_frac(8,7),atom_frac(8,8)
- !close(out_unit)  
 
 call absorption_ioneqther(nH,Fegr_dust,atom_frac,atomabund,zfac, emod, nemod, optical_depth,bxs_restored,cion,bener,tol) 
 
@@ -541,32 +532,16 @@ end subroutine create_energy_grid_ioneqther
       real (kind = 8) :: i0u,bu,xrb
       background_ioneqther=0
 
-!!! Powerlaw spectral shape with gamma = 2.1 
+!!! Powerlaw spectral shape with gamma = 2.1 (i.e. as warmabs per defect)
       pgamma=2.1
       alpha=pgamma-1
       norm=(alpha-1)*e_min**(alpha-1)
       background_ioneqther=norm*(e_bkg**(-alpha))
-!!      background_ioneqther=4.d0*pi*norm*(e_bkg**(-alpha))
 
-!!! Blackbody with peak at Tbb=1 keV!!!
-!!norm=15/((pi)**4)
-!!background_ioneqther=norm*(dble(e_bkg)**3)/(dexp(dble(e_bkg))-1)
 
- 
-!!Background from Churazov
-!---- UV
-!!     bu=2.5
-!!     i0u=4.d0*pi*0.287
-!---- XRB
-!!      xrb=4.d0*pi*1.75d-26*(e_bkg/40d0)**(-1.29)*dexp(-dble(e_bkg)/40d0)/(40d0*1.602177d-9)*2.417d17
-!!      background_ioneqther=xrb+i0u*e_bkg**(-bu)
-!      background=0
       return
       end
 
-
- 
- 
 
 !====================================================================
 
@@ -682,11 +657,6 @@ end subroutine create_energy_grid_ioneqther
                p=p+4.d0*pi*s_tmp*1d-18*background_ioneqther(e_pceq,e1)*(de/(e_pceq)) 
                wa=wa+4.d0*pi*s_tmp*1d-18*background_ioneqther(e_pceq,e1)*(de/(e_pceq)) 
 
-
-!To include ionization parameter 
-!               p=p+xi_factor*s_tmp*1d-18*background_ioneqther(e_pceq,e1)*(de/(e_pceq)) 
-!               wa=wa+xi_factor*s_tmp*1d-18*background_ioneqther(e_pceq,e1)*(de/(e_pceq)) 
- 
  
                e_pceq = e_pceq+de
             end do 
@@ -718,21 +688,14 @@ end subroutine create_energy_grid_ioneqther
  
          end do 
          p=p+p2 !Auger effect
-!         p=(Xi*p) !Ionization parameter 
          p=(Xi*p)/(4*pi) !Ionization parameter 
-!        p=(Xi*p*nee)/(4*pi) !Ionization parameter 
-!         p=(Xi*p*nee)  !Ionization parameter 
-!         p=(Xi*p*nee)/((4*pi)**2.) !Ionization parameter 
-!         p=(Xi*p)/(4*pi)**2. !Ionization parameter 
          pp(i)=p
-!        pp(i)=0 !no photoionization
  
       end do 
 
 
 
 !!!ION FRACTIONS !!!
-
    
 !!! FOR HYDROGEN !!!!!
     if(iz.eq.1)then
