@@ -44,29 +44,7 @@ The input parameters include the hydrogen column density (in units of 1022 cm-2)
 
 Note that the IONeq does not solve the thermal equilibrium equations, that is the balance heating rate=cooling rate, from which one obtains the gas temperature. Instead, we treat both, the gas temperature T and the ionization parameter ξ, as independent (free) parameters of the model.
 
-ATOMIC DATA
 
-With the default set up - that is, if you have run compile.sh - the model will look for the cross-section data file in atomic_data/AtomicData.fits, relative to the directory in which the module is located. The XSPEC xset command can be used to set the IONEQROOT variable; if this is set then it is used instead of the path to the module. So after
-
-XSPEC12> xset IONEQROOT /path-to-folder/ioneq/
-
-then the model will use the file atomic_data/AtomicData.fits (the IONEQROOT refers to the directory containing the atomic_data/ directory). Note that IONEQROOT over-rides any changes made by running compile.sh when building the model.
-
-The location of the file can be found by setting the XSPEC chatter level to 20 or higher - e.g.
-
-XSPEC12> chatter 20
-
-before evaluating the model.
-
-We include in our model the following atomic data, in order to compute the ion fractions assuming ionization equilibrium:
-
-- Collisional ionization: ionization rates from [Voronov (1997)](https://ui.adsabs.harvard.edu/abs/1997ADNDT..65....1V/abstract).
-- Radiative recombination: rates from [Verner & Ferland (1996)](https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract).
-- Dielectronic recombination: rates from [Arnaud & Rothenflug (1985)](https://ui.adsabs.harvard.edu/abs/1985A%26AS...60..425A/abstract).
-- Photoionization: cross sections from [Verner et al. (1996)](https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract) and Auger probabilities from [Kaastra & Mewe (1993)](https://ui.adsabs.harvard.edu/abs/1993A%26AS...97..443K/abstract). 
-
-NOTE: In order to compute the optical depth, IONeq uses the same high-resolution photoabsorption cross-sections included in the XSTAR photonionization code.
- 
 CONTACT
 
 This package is still being tested. Please contact me with any reports or questions.
