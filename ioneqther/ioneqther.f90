@@ -215,7 +215,7 @@ external :: fgmstr
 character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/thermal/solar/v1.0'  
  
 ! Where do we look for the data?
-ioneqther_root = trim(fgmstr('ioneqtherROOT'))
+ioneqther_root = trim(fgmstr('IONEQTHERROOT'))
 if (ioneqther_root .EQ. '') then
 ioneqther_root = local_dir
 endif
@@ -309,7 +309,7 @@ do i=0,nion
 nemax(i)=650000
 enddo
 ! Where do we look for the data?
-ioneqther_root = trim(fgmstr('ioneqtherROOT'))
+ioneqther_root = trim(fgmstr('IONEQTHERROOT'))
 if (ioneqther_root .EQ. '') then
 ioneqther_root = local_dir
 endif

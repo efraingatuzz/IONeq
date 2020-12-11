@@ -216,7 +216,7 @@ external :: fgmstr
 character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/thermal/varabund/v1.0'  
  
 ! Where do we look for the data?
-ioneqthervar_root = trim(fgmstr('ioneqthervarROOT'))
+ioneqthervar_root = trim(fgmstr('IONEQTHERVARROOT'))
 if (ioneqthervar_root .EQ. '') then
 ioneqthervar_root = local_dir
 endif
@@ -310,7 +310,7 @@ do i=0,nion
 nemax(i)=650000
 enddo
 ! Where do we look for the data?
-ioneqthervar_root = trim(fgmstr('ioneqthervarROOT'))
+ioneqthervar_root = trim(fgmstr('IONEQTHERVARROOT'))
 if (ioneqthervar_root .EQ. '') then
 ioneqthervar_root = local_dir
 endif
