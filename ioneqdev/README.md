@@ -16,9 +16,9 @@ The model can be downloaded from the Github repository at https://github.com/efr
 
 INSTALLATION
 
-You can use the compile.sh file to install the model by doing
+First, you need to decompress the "AtomicData.tar.gz" file inside the "atomic_data" folder (e.g. using untar). Then, you can use the compile.sh file to install the model by doing (depending on your OS)
 
-sh compile.sh
+sh compile_linux.sh/sh compile_mac.sh
 
 In the  model folder or you can setting up and using this model is as described in the xspec manual:
 
