@@ -4,10 +4,13 @@
 !
 !
 ! XSPEC local model for absorption considering ionization equilibrium
-! Version 1.3 October 2020
+! Version 1.4 January 2021
 !
 !
 ! To do list:
+!
+! Notes on version 1.4
+! -- All abundances are free parameters (similar to hotabs)
 !
 ! Notes on version 1.3
 ! -- Abundances are read from XSPEC 
@@ -32,7 +35,7 @@ subroutine ioneq(ear, ne, param, ifl, photar)
 ! The main routine to call all subroutines
 !
 implicit none
-integer,parameter :: num_param = 9, out_unit=20, nion=168
+integer,parameter :: num_param = 31, out_unit=20, nion=168
 integer,parameter :: nemod=650000 !Number of elements for each ion cross section.
 integer,parameter :: nnemod=350000
 integer :: ne, ifl,size_old_cross,kk,k
@@ -40,7 +43,11 @@ double precision :: nH, rshift, emod(1:nemod), coemod(nemod),  cion(0:nion), ben
 double precision :: optical_depth(nemod)
 double precision :: optical_depth_convolved(0:nemod),bxs_restored(0:nion,nemod)  
 double precision :: bxs_crude(0:nion,nnemod),ener_crude(0:nion,nnemod)
-double precision :: zfac, Xi,ion_par, AO, ANe, AFe, AFe_dust,vturb,temp1,Fegr_dust,tol
+double precision :: zfac, Xi,ion_par, AFe_dust,vturb,temp1,Fegr_dust,tol
+double precision :: AC,AN,AO,AF,ANe,ANa,AMg 
+double precision :: AAl,ASi,AP,AS,ACl,AAr
+double precision :: AK,ACa,ASc,ATi,AV,ACu
+double precision :: ACr,AMn,AFe,ACo,ANi,AZn 
 real :: ear(0:ne), param(num_param),photar(ne)
 logical :: startup=.true.
 !For the startup of the cross-section
@@ -54,12 +61,14 @@ double precision :: W_Auger_tmp(Imax,Imax,Nshmax,10)
 
 
 
+
+
 !To read abundances from XSPEC
 real :: fgabnz
 external :: fgabnz 
 
 character (len=40) version
-version='1.3'
+version='1.4'
 if(startup)then
  print *, ' '
  print *, 'IONEQ model Version DEV' 
@@ -90,44 +99,68 @@ t=10**lt
 ion_par=param(3)
 !Ionization parameter is in units of keV*cm/s, in order to compare with XSTAR a conversion is required --> ion_par(ioneq) = 8.79 + ion_par(xstar)
 Xi = 10**(ion_par)
-AO = param(4)
-ANe = param(5)
-AFe = param(6)
-AFe_dust = param(7)  
-vturb=param(8)
-rshift = param(9)
+AC = param(4)
+AN = param(5)
+AO = param(6)
+AF = param(7)
+ANe = param(8)
+ANa = param(9)
+AMg = param(10)
+AAl = param(11)
+ASi = param(12)
+AP = param(13)
+AS = param(14)
+ACl = param(15)
+AAr = param(16)
+AK = param(17)
+ACa = param(18)
+ASc = param(19)
+ATi = param(20)
+AV = param(21)
+ACr = param(22)
+AMn = param(23)
+AFe = param(24)
+ACo = param(25)
+ANi = param(26)
+ACu = param(27)
+AZn = param(28)
+AFe_dust = param(29)  
+vturb=param(30)
+rshift = param(31)
 zfac = 1/(1.d0+dble(rshift))  
 
 atomabund(2)=fgabnz(2) 
 atomabund(3)=fgabnz(3) 
 atomabund(4)=fgabnz(4) 
 atomabund(5)=fgabnz(5) 
-atomabund(6)=fgabnz(6) 
-atomabund(7)=fgabnz(7)
+atomabund(6)=AC*fgabnz(6)
+atomabund(7)=AN*fgabnz(7)
 atomabund(8)=AO*fgabnz(8) 
-atomabund(9)=fgabnz(9)
+atomabund(9)=AF*fgabnz(9)
 atomabund(10)=ANe*fgabnz(10) 
-atomabund(11)=fgabnz(11)
-atomabund(12)=fgabnz(12)
-atomabund(13)=fgabnz(13)
-atomabund(14)=fgabnz(14)
-atomabund(15)=fgabnz(15)
-atomabund(16)=fgabnz(16)
-atomabund(17)=fgabnz(17)
-atomabund(18)=fgabnz(18)
-atomabund(19)=fgabnz(19)
-atomabund(20)=fgabnz(20)
-atomabund(21)=fgabnz(21)
-atomabund(22)=fgabnz(22)
-atomabund(23)=fgabnz(23)
-atomabund(24)=fgabnz(24)
-atomabund(25)=fgabnz(25)
+atomabund(11)=ANa*fgabnz(11)
+atomabund(12)=AMg*fgabnz(12)
+atomabund(13)=AAl*fgabnz(13)
+atomabund(14)=ASi*fgabnz(14)
+atomabund(15)=AP*fgabnz(15)
+atomabund(16)=AS*fgabnz(16)
+atomabund(17)=ACl*fgabnz(17)
+atomabund(18)=AAr*fgabnz(18)
+atomabund(19)=AK*fgabnz(19)
+atomabund(20)=ACa*fgabnz(20)
+atomabund(21)=ASc*fgabnz(21)
+atomabund(22)=ATi*fgabnz(22)
+atomabund(23)=AV*fgabnz(23)
+atomabund(24)=ACr*fgabnz(24)
+atomabund(25)=AMn*fgabnz(25)
 atomabund(26)=AFe*fgabnz(26) 
-atomabund(27)=fgabnz(27)
-atomabund(28)=fgabnz(28)
-atomabund(29)=fgabnz(29)
-atomabund(30)=fgabnz(30)
+atomabund(27)=ACO*fgabnz(27)
+atomabund(28)=ANi*fgabnz(28)
+atomabund(29)=ACu*fgabnz(29)
+atomabund(30)=AZn*fgabnz(30)
 Fegr_dust=AFe_dust*fgabnz(26)   
+
+
 
 nee=1.e4  !Low electron density  
  
@@ -159,27 +192,20 @@ do zn=1,30,1 !Nuclear charge
  else 
 
 !For all other elements we use Verner cross-sections
-!  call pceqsub(zn,t,nee,n,Xi,W_Auger_tmp)
-!  do ii=1,zn,1 !Ion fraction except "nude core"
-!   if(n(ii)>tol)then !tolerance to accept ionic fraction		
-!    atom_frac(zn,ii)=n(ii)
-!   else
-!    atom_frac(zn,ii)=0.d0
-!   endif
-!  enddo 
+  call pceqsub(zn,t,nee,n,Xi,W_Auger_tmp)
+  do ii=1,zn,1 !Ion fraction except "nude core"
+   if(n(ii)>tol)then !tolerance to accept ionic fraction		
+    atom_frac(zn,ii)=n(ii)
+   else
+    atom_frac(zn,ii)=0.d0
+   endif
 
-!
+  enddo 
+
  endif
 
 enddo  
 
- 
-!!! For Oxygen !!!
-! open(unit=20,file='OI_ioneq.txt',position='append')
-! do i=1,650000 
-! write(20,*)bener(i),bxs_restored(16,i)  
-! enddo 
-! close(out_unit)  
 
 
 
@@ -395,7 +421,7 @@ implicit none
 include           'rates.h'
 integer,parameter :: nion=168, out_unit=20
 integer :: bnene 
-integer :: i,j,iz,in,is,Z,k
+integer :: i,j,iz,in,is,Z,k,zn
 double precision :: col22, col, tmp, cion(0:nion),vernercross, cionverner,tol 
 double precision :: bener(0:bnene), bxs2(0:nion,bnene), e1(0:bnene), atomabund(1:30)
 double precision, parameter :: c=299792.458 
@@ -407,7 +433,10 @@ real :: thresh,S,s_tmp
 !To read abundances from XSPEC
 real :: fgabnz
 external :: fgabnz  
- 
+
+
+
+
 ! Calculates the optical depth and the absorption coefficient exp(-tau)
 col=col22*1.d22
 e1(0)=(bener(0)*zfac)/1.d3
@@ -426,24 +455,24 @@ do i=1,bnene
  tmp=tmp+(col)*(Fegr_dust*bxs2(168,i)) 
 
 !!!!Calculates the optical depth for elements for which I am using Verner cross-section!!!
-! do Z=1,30
-!  if(Z.eq.3.or.Z.eq.4.or.Z.eq.5.or.Z.eq.9.or.Z.eq.11.or.Z.eq.13&
-!  .or.Z.eq.15.or.Z.eq.17.or.Z.eq.19.or.Z.eq.21.or.Z.eq.22.or.Z.eq.23&
-!  .or.Z.eq.24.or.Z.eq.25.or.Z.eq.27.or.Z.eq.29.or.Z.eq.30)then
-!   vernercross=0.
-!   do j=1,Z
-!    if(atom_frac(Z,j).gt.tol)then
-!     cionverner=atomabund(Z)*atom_frac(Z,j) 
-!     do is=1,7
-!      call phfit2_b(Z,j,is,real(e1(i)),s_tmp,thresh)   
-!      vernercross=vernercross+s_tmp*1e-18
-!     enddo
-!     tmp=tmp+(col)*(cionverner*vernercross)
-!    endif
-!   enddo
-!  endif 
-! enddo 
-!!!!!
+ do Z=1,30
+ if(zn.eq.1.or.zn.eq.2.or.zn.eq.6.or.zn.eq.7.or.zn.eq.8.or.zn.eq.10&
+ .or.zn.eq.12.or.zn.eq.14.or.zn.eq.16.or.zn.eq.18&
+ .or.zn.eq.20.or.zn.eq.26.or.zn.eq.28)then
+   vernercross=0.
+   do j=1,Z
+    if(atom_frac(Z,j).gt.tol)then
+     cionverner=atomabund(Z)*atom_frac(Z,j) 
+     do is=1,7
+      call phfit2_b(Z,j,is,real(e1(i)),s_tmp,thresh)   
+      vernercross=vernercross+s_tmp*1e-18
+     enddo
+     tmp=tmp+(col)*(cionverner*vernercross)
+    endif
+   enddo
+  endif 
+ enddo 
+!!!!
 
 ! Calculates the optical depth
  tau=tmp
@@ -451,6 +480,8 @@ do i=1,bnene
  
 enddo 
 
+
+  
 
 end subroutine absorption_ioneq
 ! ======================================= !
@@ -5813,4 +5844,3 @@ do i=1,nene-2
 enddo 
 
 end subroutine interpolate_cross_section_ioneq
-
