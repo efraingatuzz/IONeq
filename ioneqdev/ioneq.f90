@@ -4,7 +4,7 @@
 !
 !
 ! XSPEC local model for absorption considering ionization equilibrium
-! Version 1.4 January 2021
+! Version 1.5 January 2025
 !
 !
 ! To do list:
@@ -78,7 +78,7 @@ real :: fgabnz
 external :: fgabnz 
 
 character (len=40) version
-version='1.4'
+version='1.5'
 if(startup)then
  print *, ' '
  print *, 'IONEQ model Version DEV' 
