@@ -4,7 +4,10 @@
 !
 !
 ! XSPEC local model for absorption considering ionization equilibrium
-! Version 1.2 October 2020
+! Version 1.3 January 2025
+!
+! Notes on version 1.3
+! -- Including atom_header(30,30) in a module to be used persistently
 !
 ! Notes on version 1.2
 ! -- Abundances are read from XSPEC 
@@ -16,10 +19,16 @@
 !
 !
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+MODULE atom_header_mod
+    INTEGER, SAVE :: atom_header(30,30)
+END MODULE atom_header_mod
+
+
 subroutine ioneqthervar(ear, ne, param, ifl, photar)
 !
 ! The main routine to call all subroutines
 !
+use atom_header_mod
 implicit none
 integer,parameter :: num_param = 34, out_unit=20, nion=168
 integer,parameter :: nemod=650000 !Number of elements for each ion cross section.
@@ -36,7 +45,8 @@ logical :: startup=.true.
 integer :: startup_ion(0:nion)
 !Variables for ionization equilibrium
 include 'rates.h'
-integer :: zn,ii,atom_header(30,30),i
+integer :: zn,ii,i
+!integer atom_header(30,30)
 integer,parameter :: znm=100
 double precision :: n(znm),t,nee,lt, atom_frac(30,30)
 double precision :: W_Auger_tmp(Imax,Imax,Nshmax,10)
@@ -48,16 +58,17 @@ real :: fgabnz
 external :: fgabnz 
 
 character (len=40) version
-version='1.2'
+version='1.3'
 if(startup)then
  print *, ' '
- print *, 'ioneqthervar model Version ',version
+ print *, 'ioneqthervar model Version ', version
  print *, 'Gatuzz & Churazov (2016)'
  print *, 'Abundaces are provided by XSPEC'  
  print *, ' '
  !To read only once the atomic and auger data
  call readAugerKM93(W_Auger_tmp)
- call read_atomic_data_header_ioneqthervar(atom_header)
+ call read_atomic_data_header_ioneqthervar()
+! call read_atomic_data_header_ioneqthervar(atom_header)
  call create_energy_grid_ioneqthervar(1.d1,1.d6,bener,nemod) !Absorption coefficient calculation grid  = cross section grid 
  !To read solid_iron
  call read_one_cross_sections_ioneqthervar(169,nnemod,bxs_crude,ener_crude,size_old_cross)
@@ -160,6 +171,12 @@ do zn=1,30,1 !Nuclear charge
 
 enddo  
 
+ 
+!!! For Oxygen !!!
+ !open(unit=20,file='O_CIE.txt',position='append')
+ !write(20,*)lt,atom_frac(8,1),atom_frac(8,2),atom_frac(8,3),atom_frac(8,4), &
+ !atom_frac(8,5),atom_frac(8,6),atom_frac(8,7),atom_frac(8,8)
+ !close(out_unit)  
 
 call absorption_ioneqthervar(nH,Fegr_dust,atom_frac,atomabund,zfac, emod, nemod, optical_depth,bxs_restored,cion,bener,tol) 
 
@@ -189,17 +206,19 @@ end subroutine ioneqthervar
 !!!!!!!TO READ ATOMIC DATA HEADER!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_atomic_data_header_ioneqthervar(atom_header)
+subroutine read_atomic_data_header_ioneqthervar()
+!subroutine read_atomic_data_header_ioneqthervar(atom_header)
 !
 ! This routine reads the atomic data IDs from first header
 ! on atomic data file
 !
 !
+use atom_header_mod
 implicit none
 integer,parameter :: nion=168, out_unit=20
 integer ::   i,  status
 double precision :: z(nion), charge(nion), column_id(nion)
-integer :: atom_header(30,30)
+!integer :: atom_header(30,30)
 character (*), parameter :: fileloc = '/atomic_data/AtomicData.fits'
 character (*), parameter :: ismreadchat = 'ioneqthervar: reading from '
 character (len=255 + 29) :: filename2 ! len(fileloc)
@@ -213,10 +232,10 @@ integer :: felem=1, nulld=0
 logical :: anynull
 character (len=255) :: fgmstr
 external :: fgmstr
-character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/thermal/varabund/v1.0'  
+character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/thermal/varabund/v1.1'  
  
 ! Where do we look for the data?
-ioneqthervar_root = trim(fgmstr('IONEQTHERVARROOT'))
+ioneqthervar_root = trim(fgmstr('ioneqthervarROOT'))
 if (ioneqthervar_root .EQ. '') then
 ioneqthervar_root = local_dir
 endif
@@ -302,7 +321,7 @@ integer :: nulld=0, logical_start(0:nion)
 logical :: anynull
 character (len=255) :: fgmstr
 external :: fgmstr
-character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/thermal/varabund/v1.0'
+character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/thermal/varabund/v1.1'
  
 
 !Number of elements for each ion cross section.
@@ -310,7 +329,7 @@ do i=0,nion
 nemax(i)=650000
 enddo
 ! Where do we look for the data?
-ioneqthervar_root = trim(fgmstr('IONEQTHERVARROOT'))
+ioneqthervar_root = trim(fgmstr('ioneqthervarROOT'))
 if (ioneqthervar_root .EQ. '') then
 ioneqthervar_root = local_dir
 endif
@@ -538,7 +557,21 @@ end subroutine create_energy_grid_ioneqthervar
       alpha=pgamma-1
       norm=(alpha-1)*e_min**(alpha-1)
       background_ioneqthervar=norm*(e_bkg**(-alpha))
+!!      background_ioneqthervar=4.d0*pi*norm*(e_bkg**(-alpha))
 
+!!! Blackbody with peak at Tbb=1 keV!!!
+!!norm=15/((pi)**4)
+!!background_ioneqthervar=norm*(dble(e_bkg)**3)/(dexp(dble(e_bkg))-1)
+
+ 
+!!Background from Churazov
+!---- UV
+!!     bu=2.5
+!!     i0u=4.d0*pi*0.287
+!---- XRB
+!!      xrb=4.d0*pi*1.75d-26*(e_bkg/40d0)**(-1.29)*dexp(-dble(e_bkg)/40d0)/(40d0*1.602177d-9)*2.417d17
+!!      background_ioneqthervar=xrb+i0u*e_bkg**(-bu)
+!      background=0
       return
       end
 
@@ -660,6 +693,11 @@ end subroutine create_energy_grid_ioneqthervar
                p=p+4.d0*pi*s_tmp*1d-18*background_ioneqthervar(e_pceq,e1)*(de/(e_pceq)) 
                wa=wa+4.d0*pi*s_tmp*1d-18*background_ioneqthervar(e_pceq,e1)*(de/(e_pceq)) 
 
+
+!To include ionization parameter 
+!               p=p+xi_factor*s_tmp*1d-18*background_ioneqthervar(e_pceq,e1)*(de/(e_pceq)) 
+!               wa=wa+xi_factor*s_tmp*1d-18*background_ioneqthervar(e_pceq,e1)*(de/(e_pceq)) 
+ 
  
                e_pceq = e_pceq+de
             end do 
@@ -691,10 +729,14 @@ end subroutine create_energy_grid_ioneqthervar
  
          end do 
          p=p+p2 !Auger effect
+!         p=(Xi*p) !Ionization parameter 
          p=(Xi*p)/(4*pi) !Ionization parameter 
-
+!        p=(Xi*p*nee)/(4*pi) !Ionization parameter 
+!         p=(Xi*p*nee)  !Ionization parameter 
+!         p=(Xi*p*nee)/((4*pi)**2.) !Ionization parameter 
+!         p=(Xi*p)/(4*pi)**2. !Ionization parameter 
          pp(i)=p
-
+!        pp(i)=0 !no photoionization
  
       end do 
 
@@ -4256,7 +4298,7 @@ data (drec_c(i,23),i=1,7) /14, 12,   0.1203,  -2.6900,  19.1943,  -0.1479,   0.1
       double precision :: W_Auger_tmp(Imax,Imax,Nshmax,10) 
       double precision  W_Auger
       COMMON /rauger/   W_Auger(Imax,Imax,Nshmax,10) 
-      character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/thermal/varabund/v1.0'
+      character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/thermal/varabund/v1.1'
       tabfile = trim(local_dir)//trim(data_file)
  
 !     construct file name
@@ -5768,4 +5810,3 @@ do i=1,nene-2
 enddo 
 
 end subroutine interpolate_cross_section_ioneqthervar
-
