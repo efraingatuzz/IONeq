@@ -9,6 +9,9 @@
 !
 ! To do list:
 !
+! Notes on version 1.5
+! -- Including atom_header(30,30) in a module to be used persistently
+!
 ! Notes on version 1.4
 ! -- All abundances are free parameters (similar to hotabs)
 !
@@ -30,12 +33,18 @@
 !
 !
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+MODULE atom_header_mod
+    INTEGER, SAVE :: atom_header(30,30)
+END MODULE atom_header_mod
+
+
 subroutine ioneq(ear, ne, param, ifl, photar)
 !
 ! The main routine to call all subroutines
 !
+use atom_header_mod
 implicit none
-integer,parameter :: num_param = 31, out_unit=20, nion=168
+integer,parameter :: num_param = 9, out_unit=20, nion=168
 integer,parameter :: nemod=650000 !Number of elements for each ion cross section.
 integer,parameter :: nnemod=350000
 integer :: ne, ifl,size_old_cross,kk,k
@@ -54,7 +63,8 @@ logical :: startup=.true.
 integer :: startup_ion(0:nion)
 !Variables for ionization equilibrium
 include 'rates.h'
-integer :: zn,ii,atom_header(30,30),i
+integer :: zn,ii,i
+!integer :: atom_header(30,30)
 integer,parameter :: znm=100
 double precision :: n(znm),t,nee,lt, atom_frac(30,30)
 double precision :: W_Auger_tmp(Imax,Imax,Nshmax,10)
@@ -77,7 +87,8 @@ if(startup)then
  print *, ' '
  !To read only once the atomic and auger data
  call readAugerKM93(W_Auger_tmp)
- call read_atomic_data_header_ioneq(atom_header)
+ call read_atomic_data_header_ioneq()
+! call read_atomic_data_header_ioneq(atom_header)
  call create_energy_grid_ioneq(1.d1,1.d6,bener,nemod) !Absorption coefficient calculation grid  = cross section grid 
  !To read solid_iron
  call read_one_cross_sections_ioneq(169,nnemod,bxs_crude,ener_crude,size_old_cross)
@@ -99,65 +110,43 @@ t=10**lt
 ion_par=param(3)
 !Ionization parameter is in units of keV*cm/s, in order to compare with XSTAR a conversion is required --> ion_par(ioneq) = 8.79 + ion_par(xstar)
 Xi = 10**(ion_par)
-AC = param(4)
-AN = param(5)
-AO = param(6)
-AF = param(7)
-ANe = param(8)
-ANa = param(9)
-AMg = param(10)
-AAl = param(11)
-ASi = param(12)
-AP = param(13)
-AS = param(14)
-ACl = param(15)
-AAr = param(16)
-AK = param(17)
-ACa = param(18)
-ASc = param(19)
-ATi = param(20)
-AV = param(21)
-ACr = param(22)
-AMn = param(23)
-AFe = param(24)
-ACo = param(25)
-ANi = param(26)
-ACu = param(27)
-AZn = param(28)
-AFe_dust = param(29)  
-vturb=param(30)
-rshift = param(31)
+AO = param(4)
+ANe = param(5)
+AFe = param(6)
+AFe_dust = param(7)  
+vturb=param(8)
+rshift = param(9)
 zfac = 1/(1.d0+dble(rshift))  
 
 atomabund(2)=fgabnz(2) 
 atomabund(3)=fgabnz(3) 
 atomabund(4)=fgabnz(4) 
 atomabund(5)=fgabnz(5) 
-atomabund(6)=AC*fgabnz(6)
-atomabund(7)=AN*fgabnz(7)
+atomabund(6)=fgabnz(6)
+atomabund(7)=fgabnz(7)
 atomabund(8)=AO*fgabnz(8) 
-atomabund(9)=AF*fgabnz(9)
+atomabund(9)=fgabnz(9)
 atomabund(10)=ANe*fgabnz(10) 
-atomabund(11)=ANa*fgabnz(11)
-atomabund(12)=AMg*fgabnz(12)
-atomabund(13)=AAl*fgabnz(13)
-atomabund(14)=ASi*fgabnz(14)
-atomabund(15)=AP*fgabnz(15)
-atomabund(16)=AS*fgabnz(16)
-atomabund(17)=ACl*fgabnz(17)
-atomabund(18)=AAr*fgabnz(18)
-atomabund(19)=AK*fgabnz(19)
-atomabund(20)=ACa*fgabnz(20)
-atomabund(21)=ASc*fgabnz(21)
-atomabund(22)=ATi*fgabnz(22)
-atomabund(23)=AV*fgabnz(23)
-atomabund(24)=ACr*fgabnz(24)
-atomabund(25)=AMn*fgabnz(25)
+atomabund(11)=fgabnz(11)
+atomabund(12)=fgabnz(12)
+atomabund(13)=fgabnz(13)
+atomabund(14)=fgabnz(14)
+atomabund(15)=fgabnz(15)
+atomabund(16)=fgabnz(16)
+atomabund(17)=fgabnz(17)
+atomabund(18)=fgabnz(18)
+atomabund(19)=fgabnz(19)
+atomabund(20)=fgabnz(20)
+atomabund(21)=fgabnz(21)
+atomabund(22)=fgabnz(22)
+atomabund(23)=fgabnz(23)
+atomabund(24)=fgabnz(24)
+atomabund(25)=fgabnz(25)
 atomabund(26)=AFe*fgabnz(26) 
-atomabund(27)=ACO*fgabnz(27)
-atomabund(28)=ANi*fgabnz(28)
-atomabund(29)=ACu*fgabnz(29)
-atomabund(30)=AZn*fgabnz(30)
+atomabund(27)=fgabnz(27)
+atomabund(28)=fgabnz(28)
+atomabund(29)=fgabnz(29)
+atomabund(30)=fgabnz(30)
 Fegr_dust=AFe_dust*fgabnz(26)   
 
 
@@ -238,17 +227,19 @@ end subroutine ioneq
 !!!!!!!TO READ ATOMIC DATA HEADER!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_atomic_data_header_ioneq(atom_header)
+subroutine read_atomic_data_header_ioneq()
+!subroutine read_atomic_data_header_ioneq(atom_header)
 !
 ! This routine reads the atomic data IDs from first header
 ! on atomic data file
 !
 !
+use atom_header_mod
 implicit none
 integer,parameter :: nion=168, out_unit=20
 integer ::   i,  status
 double precision :: z(nion), charge(nion), column_id(nion)
-integer :: atom_header(30,30)
+!integer :: atom_header(30,30)
 character (*), parameter :: fileloc = '/atomic_data/AtomicData.fits'
 character (*), parameter :: ismreadchat = 'ioneq: reading from '
 character (len=255 + 29) :: filename2 ! len(fileloc)
@@ -262,7 +253,7 @@ integer :: felem=1, nulld=0
 logical :: anynull
 character (len=255) :: fgmstr
 external :: fgmstr
-character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev3'  
+character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev4'  
  
 ! Where do we look for the data?
 ioneq_root = trim(fgmstr('IONEQROOT'))
@@ -351,7 +342,7 @@ integer :: nulld=0, logical_start(0:nion)
 logical :: anynull
 character (len=255) :: fgmstr
 external :: fgmstr
-character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev3'
+character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev4'
  
 
 !Number of elements for each ion cross section.
@@ -4332,7 +4323,7 @@ data (drec_c(i,23),i=1,7) /14, 12,   0.1203,  -2.6900,  19.1943,  -0.1479,   0.1
       double precision :: W_Auger_tmp(Imax,Imax,Nshmax,10) 
       double precision  W_Auger
       COMMON /rauger/   W_Auger(Imax,Imax,Nshmax,10) 
-      character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev3'
+      character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev4'
       tabfile = trim(local_dir)//trim(data_file)
  
 !     construct file name
