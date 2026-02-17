@@ -1,30 +1,29 @@
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ! IONEQ
-! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-!
+! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 !
 ! XSPEC local model for absorption considering ionization equilibrium
-! Version 1.5 January 2025
+! Version 1.5 February 2026
 !
-!
-! To do list:
-!
-! Notes on version 1.5
-! -- Including atom_header(30,30) in a module to be used persistently
+! Additions to version 1.5
+! - We added the "use xsfortran" line to call all fortran routines included in xspec (valid for XSPEC 12.15.1) 
 !
 ! Notes on version 1.4
-! -- All abundances are free parameters (similar to hotabs)
+! -- Including atom_header(30,30) in a module to be used persistently
 !
 ! Notes on version 1.3
+! -- All abundances are free parameters (similar to hotabs)
+!
+! Notes on version 1.2
 ! -- Abundances are read from XSPEC 
 ! -- The model relies on the fftw library provided by XSPEC
 ! 
-! Notes on version 1.2
+! Notes on version 1.1
 ! -- Now the energy grid covers until 1e6 eV
 ! -- Now when doing the interpolation of the photoabsorption-cross sections 
 !    we are using Verner cross-sections for high energy
 !
-! Notes on version 1.1
+! Notes on version 1.0
 !
 ! -- This version includes H,He,C,N,O,Ne,Mg,Ne,S,Si,Ar,Ca,Fe,Ni and Zn 
 !    from opacity project
@@ -43,6 +42,7 @@ subroutine ioneq(ear, ne, param, ifl, photar)
 ! The main routine to call all subroutines
 !
 use atom_header_mod
+use xsfortran
 implicit none
 integer,parameter :: num_param = 9, out_unit=20, nion=168
 integer,parameter :: nemod=650000 !Number of elements for each ion cross section.
@@ -74,8 +74,8 @@ double precision :: W_Auger_tmp(Imax,Imax,Nshmax,10)
 
 
 !To read abundances from XSPEC
-real :: fgabnz
-external :: fgabnz 
+!real :: fgabnz
+!external :: fgabnz 
 
 character (len=40) version
 version='1.5'
@@ -234,6 +234,7 @@ subroutine read_atomic_data_header_ioneq()
 ! on atomic data file
 !
 !
+use xsfortran
 use atom_header_mod
 implicit none
 integer,parameter :: nion=168, out_unit=20
@@ -251,9 +252,9 @@ integer inunit,readwrite,blocksize
 integer :: hdutype
 integer :: felem=1, nulld=0
 logical :: anynull
-character (len=255) :: fgmstr
-external :: fgmstr
-character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev4'  
+!character (len=255) :: fgmstr
+!external :: fgmstr
+character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/v1.5'  
  
 ! Where do we look for the data?
 ioneq_root = trim(fgmstr('IONEQROOT'))
@@ -323,6 +324,7 @@ subroutine read_one_cross_sections_ioneq(column_number,bnene,xs,ener,nelemm)
 ! the atomic_data/ directory - i.e. it loads
 ! <path>/atomic_data/AtomicData.fits
 !
+use xsfortran
 implicit none
 integer,parameter :: nion=168, out_unit=20
 integer :: bnene,  i, j, status,column_number
@@ -340,9 +342,9 @@ integer inunit,readwrite,blocksize,nelemm,offset
 integer :: hdutype
 integer :: nulld=0, logical_start(0:nion)
 logical :: anynull
-character (len=255) :: fgmstr
-external :: fgmstr
-character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev4'
+!character (len=255) :: fgmstr
+!external :: fgmstr
+character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/v1.5'
  
 
 !Number of elements for each ion cross section.
@@ -408,6 +410,7 @@ zfac, e1, bnene, coeff, bxs2,cion, bener,tol)
 ! This is routine that calculates the optical depth given the column densities
 ! Finally returns the absorption coefficient exp(-tau)
 !
+use xsfortran
 implicit none
 include           'rates.h'
 integer,parameter :: nion=168, out_unit=20
@@ -422,8 +425,8 @@ double precision :: zfac,atom_frac(30,30)
 real :: thresh,S,s_tmp 
 
 !To read abundances from XSPEC
-real :: fgabnz
-external :: fgabnz  
+!real :: fgabnz
+!external :: fgabnz  
 
 
 
@@ -4323,7 +4326,7 @@ data (drec_c(i,23),i=1,7) /14, 12,   0.1203,  -2.6900,  19.1943,  -0.1479,   0.1
       double precision :: W_Auger_tmp(Imax,Imax,Nshmax,10) 
       double precision  W_Auger
       COMMON /rauger/   W_Auger(Imax,Imax,Nshmax,10) 
-      character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/dev4'
+      character (len=240) :: local_dir = '/media/efrain/DATA/softwares/modelosXSPEC/IonEq/v1.5'
       tabfile = trim(local_dir)//trim(data_file)
  
 !     construct file name
